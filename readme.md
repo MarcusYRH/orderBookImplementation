@@ -24,6 +24,7 @@ This is because pandas .loc which i used to pull eligible order records per row 
 
 
 ***LOAD TEST RESULTS***
+
 0) 12 records - 0.015823 sec
 1) 1000 records - 1.587653 sec
 2) 5000 records - 14.673910 sec
