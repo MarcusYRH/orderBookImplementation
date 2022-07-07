@@ -1,16 +1,15 @@
 def order_book():
+    from timeit import default_timer as timer
+    from datetime import timedelta
     import pandas as pd
-    df = pd.read_csv("TestData2.csv", header=None,
+
+    start = timer()
+    df = pd.read_csv("test_case_1.csv", header=None,
                      names=["order_type", "order_id", "buy_or_sell", "number_of_shares", "price"])
     df['added']  = 'false'
     df['fulfilled'] = 'false'
-    # df.loc[0, 'added'] = 'true'
-    # df.loc[1, 'added'] = 'true'
-    # df.loc[3, 'added'] = 'true'
 
     orders_made = []
-
-    print(df)
 
     for row in df.itertuples():
         if row.order_type == 'A':
@@ -20,6 +19,7 @@ def order_book():
                 while not matching_sell_orders.empty:
                     max_sell_price_currently = df.loc[matching_sell_orders['price'].idxmax()]
                     fulfilled_sell_bool = max_sell_price_currently.number_of_shares - row.number_of_shares <= 0
+
                     df.loc[matching_sell_orders[
                                'price'].idxmax(), 'number_of_shares'] = 0 if fulfilled_sell_bool else max_sell_price_currently.number_of_shares - number_outstanding
                     df.loc[matching_sell_orders['price'].idxmax(), 'fulfilled'] = 'true' if fulfilled_sell_bool else 'false'
@@ -94,8 +94,33 @@ def order_book():
                 df = df[df.number_of_shares != 0]
         else:
             df = df[df.order_id != row.order_id]
-    print(df)
-    print("Done!")
+    end = timer()
+    print(timedelta(seconds=end - start))
+    print()
+    print_orders_and_order_book(df, orders_made)
+
+
+def print_orders_and_order_book(df, orders_made):
+    df = df.groupby(['order_type', 'price', 'buy_or_sell'], sort=False)[['number_of_shares']].agg(list).reset_index()
+    print("TRADES EXECUTED FOR INPUT FILE:")
+    for order in orders_made:
+        print(order)
+    print()
+    print("ORDER BOOK FINAL STATE:")
+    print("=================")
+    print("ASK")
+    for row in df.itertuples():
+        if row.order_type == 'A':
+            li_shares = row.number_of_shares
+            print("{}: {}".format(row.price, li_shares))
+    print("------------")
+    for row in df.itertuples():
+        if row.order_type == 'B':
+            li_shares = row.number_of_shares
+            print("{}: {}".format(row.price, li_shares))
+    print("BID")
+    print("=================")
+
 
 if __name__ == '__main__':
     order_book()
