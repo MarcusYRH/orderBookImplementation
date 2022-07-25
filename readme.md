@@ -1,3 +1,5 @@
+Just a firstcut to play around :) 
+
 ***Main flow explained***
 1) Load entire file into a pandas dataframe
 2) Start reading from top-down, and mark records that are read
